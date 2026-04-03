@@ -1,0 +1,27 @@
+{
+  "name": "@js-webs/frontend-react",
+  "version": "0.1.0",
+  "description": "前端 React 练习",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=22.22.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "vite": "^5.0.0",
+    "@vitejs/plugin-react": "^4.1.0",
+    "@types/react": "^18.2.31",
+    "@types/react-dom": "^18.2.14"
+  }
+}

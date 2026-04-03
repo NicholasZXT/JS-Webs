@@ -1,0 +1,26 @@
+{
+  "name": "@js-webs/frontend-vue",
+  "version": "0.1.0",
+  "description": "前端 Vue 练习",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=22.22.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "vue": "^3.3.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "vite": "^5.0.0",
+    "@vitejs/plugin-vue": "^4.5.0",
+    "@vue/tsconfig": "^0.4.0",
+    "vue-tsc": "^1.8.21"
+  }
+}
