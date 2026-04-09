@@ -12,10 +12,20 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "hello-js": "node src/hello.js",
+    "hello-ts": "npx ts-node src/hello.ts",
+    "promise-usage": "npx ts-node src/basic/promise-usage.ts",
+    "node-process": "npx ts-node src/node-usage/process-usage.ts arg1 arg2",
+    "node-console": "npx ts-node src/node-usage/console-usage.ts",
+    "node-path": "npx ts-node src/node-usage/path-usage.ts",
+    "node-os": "npx ts-node src/node-usage/os-usage.ts",
+    "node-fs": "npx ts-node src/node-usage/fs-usage.ts",
+    "node-http": "npx ts-node src/node-usage/http-usage.ts"
   },
-  "dependencies": {},
   "devDependencies": {
+    "@types/node": "^25.5.2",
+    "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }
 }
