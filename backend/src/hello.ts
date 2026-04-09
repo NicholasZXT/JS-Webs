@@ -1,7 +1,7 @@
 import express, { type Express, type Request, type Response } from 'express';
 
 const app: Express = express();
-const port = 3000;
+const port = 8090;
 
 // Middleware
 app.use(express.json());
