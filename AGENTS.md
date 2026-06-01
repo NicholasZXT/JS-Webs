@@ -8,9 +8,9 @@
 
 **项目名**: JS-Webs  
 **目标**: JavaScript/Web 开发入门练习（前端 + 后端 + 基础语法）  
-**创建日期**: 2026-04-03  
-**架构模式**: 四个独立子项目（非 Workspace 模式）  
-**前端分离**: React 和 Vue 两个框架分别实现，便于对比学习
+**架构模式**: 五个独立子项目（非 Workspace 模式）  
+**前端分离**: React 和 Vue 两个框架分别实现，便于对比学习  
+**LLM 应用**: 独立的 `llm-apps` 子项目，专注 LLM 应用开发练习
 
 ---
 
@@ -18,7 +18,7 @@
 
 ### 核心设计决策
 
-1. **四个独立子项目**，而非单一仓库
+1. **五个独立子项目**，而非单一仓库
    - 各子项目完全独立，各自有 `package.json`、`tsconfig.json`、`node_modules`
    - 每个项目可独立启动、构建、测试
    - 前端分为 React 和 Vue 两个子项目，便于框架对比学习
@@ -29,6 +29,7 @@
    - **frontend-react**: 浏览器端开发，React 18 + Vite（UI、交互、状态管理）
    - **frontend-vue**: 浏览器端开发，Vue 3 + Vite（UI、交互、状态管理），与 React 对比学习
    - **backend**: Node.js 服务端，Express（路由、API、业务逻辑）
+   - **llm-apps**: LLM 应用开发练习，集成 LangChain、Vercel AI SDK、Mastra、LlamaIndex 等框架
 
 ### 全局约定
 
@@ -76,6 +77,12 @@ JS-Webs/
 │   ├── src/
 │   ├── dist/
 │   └── node_modules/
+├── llm-apps/                # 子项目
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── src/
+│   ├── dist/
+│   └── node_modules/
 ├── .gitignore               # 忽略规则
 ├── README.md                # 项目说明
 └── AGENTS.md                # 本文件
@@ -105,6 +112,13 @@ JS-Webs/
 - `@controllers/*` → `src/controllers/*`
 - `@models/*` → `src/models/*`
 - `@middleware/*` → `src/middleware/*`
+- `@utils/*` → `src/utils/*`
+
+**llm-apps**:
+- `@/*` → `src/*`
+- `@agents/*` → `src/agents/*`
+- `@chains/*` → `src/chains/*`
+- `@tools/*` → `src/tools/*`
 - `@utils/*` → `src/utils/*`
 
 

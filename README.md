@@ -4,7 +4,7 @@ JavaScript-Web 开发实践
 
 ## 📁 项目结构
 
-本项目采用**四个独立子项目**的结构，分别用于前端（React/Vue）、后端和基础语法练习。
+本项目采用**五个独立子项目**的结构，分别用于前端（React/Vue）、后端、基础语法练习和 LLM 应用开发。
 
 ```
 JS-Webs/
@@ -12,6 +12,7 @@ JS-Webs/
 ├── frontend-react/          ⚛️  前端 React 实战项目（React 18 + Vite）
 ├── frontend-vue/            🖖 前端 Vue 实战项目（Vue 3 + Vite）
 ├── backend/                 🔧 后端实战项目（Node.js + Express）
+├── llm-apps/                🤖 LLM 应用开发练习（LangChain、Vercel AI SDK 等）
 ├── .gitignore
 └── README.md
 ```
@@ -105,6 +106,27 @@ npm run type-check   # 检查 TypeScript 类型
 
 ---
 
+### 5. `llm-apps` - LLM 应用开发练习
+
+**用途**: 学习 LangChain.js、Vercel AI SDK、Mastra、LlamaIndex 等 LLM 开发框架，构建 AI Agent、RAG 系统等。
+
+**进入方式**:
+```bash
+cd llm-apps
+npm install
+npm run dev          # 启动 TypeScript Watch 模式，监听文件变化
+npm run build        # 编译 TypeScript 到 dist/
+npm run type-check   # 检查 TypeScript 类型
+```
+
+**项目特点**:
+- 集成主流 LLM 开发框架（LangChain、Vercel AI SDK、Mastra、LlamaIndex 等）
+- 练习 AI Agent、RAG、Prompt 工程等 LLM 应用模式
+- 支持路径别名 `@/*`, `@agents/*`, `@chains/*`, `@tools/*` 等
+- 开启 TypeScript 严格模式
+
+---
+
 ## 📦 依赖概览
 
 | 子项目 | 主要依赖 | 开发工具 |
@@ -113,6 +135,7 @@ npm run type-check   # 检查 TypeScript 类型
 | frontend-react | React, React-DOM | Vite, TypeScript, @types/* |
 | frontend-vue | Vue 3 | Vite, TypeScript, @vitejs/plugin-vue |
 | backend | Express | TypeScript, tsx, @types/* |
+| llm-apps | LangChain, Vercel AI SDK, Mastra, LlamaIndex 等 | TypeScript, tsx, @types/* |
 
 ---
 
@@ -132,6 +155,9 @@ cd backend && npm install && npm run dev
 
 # 基础语法练习
 cd language-basics && npm install && npm run dev
+
+# LLM 应用开发练习
+cd llm-apps && npm install && npm run dev
 ```
 
 ### 批量命令（后续升级为 Workspace 后可用）
@@ -162,6 +188,7 @@ pnpm type-check      # 检查所有子项目的类型
 3. **进入 frontend-vue**：对比学习 Vue，理解框架差异（可选）
 4. **进入 backend**：学习 Node.js 与服务端逻辑
 5. **前后端联动**：将前端与后端对接，实现完整功能
+6. **进入 llm-apps**：探索 LLM 应用开发，构建 AI Agent 与 RAG 系统
 
 ---
 
