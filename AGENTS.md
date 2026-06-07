@@ -26,9 +26,9 @@
 
 2. **语义清晰的职责划分**
    - **language-basics**: 纯 JavaScript/TypeScript 语法学习，无框架依赖
-   - **frontend-react**: 浏览器端开发，React 18 + Vite（UI、交互、状态管理）
-   - **frontend-vue**: 浏览器端开发，Vue 3 + Vite（UI、交互、状态管理），与 React 对比学习
-   - **backend**: Node.js 服务端，Express（路由、API、业务逻辑）
+   - **web-frontend-react**: 浏览器端开发，React 18 + Vite（UI、交互、状态管理）
+   - **web-frontend-vue3**: 浏览器端开发，Vue 3 + Vite（UI、交互、状态管理），与 React 对比学习
+   - **web-backend**: Node.js 服务端，Express（路由、API、业务逻辑）
    - **llm-apps**: LLM 应用开发练习，集成 LangChain、Vercel AI SDK、Mastra、LlamaIndex 等框架
 
 ### 全局约定
@@ -55,7 +55,7 @@ JS-Webs/
 │   ├── src/                 # 源码
 │   ├── dist/                # 编译输出（不提交）
 │   └── node_modules/        # 依赖（不提交）
-├── frontend-react/          # 子项目
+├── web-frontend-react/      # 子项目
 │   ├── package.json
 │   ├── tsconfig.json
 │   ├── vite.config.ts
@@ -63,7 +63,7 @@ JS-Webs/
 │   ├── dist/
 │   ├── node_modules/
 │   └── index.html           # Vite 入口
-├── frontend-vue/            # 子项目
+├── web-frontend-vue3/       # 子项目
 │   ├── package.json
 │   ├── tsconfig.json
 │   ├── vite.config.ts
@@ -71,7 +71,7 @@ JS-Webs/
 │   ├── dist/
 │   ├── node_modules/
 │   └── index.html           # Vite 入口
-├── backend/                 # 子项目
+├── web-backend/             # 子项目
 │   ├── package.json
 │   ├── tsconfig.json
 │   ├── src/
@@ -93,20 +93,20 @@ JS-Webs/
 **language-basics**:
 - `@/*` → `src/*`
 
-**frontend-react**:
+**web-frontend-react**:
 - `@/*` → `src/*`
 - `@components/*` → `src/components/*`
 - `@pages/*` → `src/pages/*`
 - `@hooks/*` → `src/hooks/*`
 - `@utils/*` → `src/utils/*`
 
-**frontend-vue**:
+**web-frontend-vue3**:
 - `@/*` → `src/*`
 - `@components/*` → `src/components/*`
 - `@pages/*` → `src/pages/*`
 - `@utils/*` → `src/utils/*`
 
-**backend**:
+**web-backend**:
 - `@/*` → `src/*`
 - `@routes/*` → `src/routes/*`
 - `@controllers/*` → `src/controllers/*`

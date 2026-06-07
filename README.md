@@ -9,9 +9,9 @@ JavaScript-Web 开发实践
 ```
 JS-Webs/
 ├── language-basics/         📚 JavaScript/TypeScript 基础语法学习
-├── frontend-react/          ⚛️  前端 React 实战项目（React 18 + Vite）
-├── frontend-vue/            🖖 前端 Vue 实战项目（Vue 3 + Vite）
-├── backend/                 🔧 后端实战项目（Node.js + Express）
+├── web-frontend-react/      ⚛️  前端 React 实战项目（React 18 + Vite）
+├── web-frontend-vue3/       🖖 前端 Vue 实战项目（Vue 3 + Vite）
+├── web-backend/             🔧 后端实战项目（Node.js + Express）
 ├── llm-apps/                🤖 LLM 应用开发练习（LangChain、Vercel AI SDK 等）
 ├── .gitignore
 └── README.md
@@ -39,13 +39,13 @@ npm run type-check   # 检查类型
 
 ---
 
-### 2. `frontend-react` - 前端 React 实战项目
+### 2. `web-frontend-react` - 前端 React 实战项目
 
 **用途**: 学习 React 组件、状态管理、路由、页面交互等前端开发技能。
 
 **进入方式**:
 ```bash
-cd frontend-react
+cd web-frontend-react
 npm install
 npm run dev          # 启动 Vite 开发服务器（默认 http://localhost:5173）
 npm run build        # 构建生产版本
@@ -61,13 +61,13 @@ npm run type-check   # 检查 TypeScript 类型
 
 ---
 
-### 3. `frontend-vue` - 前端 Vue 实战项目
+### 3. `web-frontend-vue3` - 前端 Vue 实战项目
 
 **用途**: 学习 Vue 3 组件、Composition API、路由、状态管理等。
 
 **进入方式**:
 ```bash
-cd frontend-vue
+cd web-frontend-vue3
 npm install
 npm run dev          # 启动 Vite 开发服务器（默认 http://localhost:5174）
 npm run build        # 构建生产版本
@@ -84,13 +84,13 @@ npm run type-check   # 检查 TypeScript 类型
 
 ---
 
-### 4. `backend` - 后端实战项目
+### 4. `web-backend` - 后端实战项目
 
 **用途**: 学习 Node.js/Express 的路由、中间件、API 设计、数据处理等后端开发技能。
 
 **进入方式**:
 ```bash
-cd backend
+cd web-backend
 npm install
 npm run dev          # 启动开发模式（tsx watch），监听文件变化自动重启
 npm run build        # 编译 TypeScript 到 dist/
@@ -132,9 +132,9 @@ npm run type-check   # 检查 TypeScript 类型
 | 子项目 | 主要依赖 | 开发工具 |
 |-------|--------|--------|
 | language-basics | 无 | TypeScript |
-| frontend-react | React, React-DOM | Vite, TypeScript, @types/* |
-| frontend-vue | Vue 3 | Vite, TypeScript, @vitejs/plugin-vue |
-| backend | Express | TypeScript, tsx, @types/* |
+| web-frontend-react | React, React-DOM | Vite, TypeScript, @types/* |
+| web-frontend-vue3 | Vue 3 | Vite, TypeScript, @vitejs/plugin-vue |
+| web-backend | Express | TypeScript, tsx, @types/* |
 | llm-apps | LangChain, Vercel AI SDK, Mastra, LlamaIndex 等 | TypeScript, tsx, @types/* |
 
 ---
@@ -145,13 +145,13 @@ npm run type-check   # 检查 TypeScript 类型
 
 ```bash
 # React 前端项目
-cd frontend-react && npm install && npm run dev
+cd web-frontend-react && npm install && npm run dev
 
 # Vue 前端项目
-cd frontend-vue && npm install && npm run dev
+cd web-frontend-vue3 && npm install && npm run dev
 
 # 后端项目
-cd backend && npm install && npm run dev
+cd web-backend && npm install && npm run dev
 
 # 基础语法练习
 cd language-basics && npm install && npm run dev
@@ -184,9 +184,9 @@ pnpm type-check      # 检查所有子项目的类型
 ## 📝 学习路线（建议）
 
 1. **从 language-basics 开始**：掌握 JS/TS 基础
-2. **进入 frontend-react**：学习 React 与浏览器交互（推荐先学）
-3. **进入 frontend-vue**：对比学习 Vue，理解框架差异（可选）
-4. **进入 backend**：学习 Node.js 与服务端逻辑
+2. **进入 web-frontend-react**：学习 React 与浏览器交互（推荐先学）
+3. **进入 web-frontend-vue3**：对比学习 Vue，理解框架差异（可选）
+4. **进入 web-backend**：学习 Node.js 与服务端逻辑
 5. **前后端联动**：将前端与后端对接，实现完整功能
 6. **进入 llm-apps**：探索 LLM 应用开发，构建 AI Agent 与 RAG 系统
 
