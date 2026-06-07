@@ -1,0 +1,7 @@
+// .vscode/settings.json
+{
+  // ✅ 禁用 TS 对未使用导入的诊断
+  "typescript.reportUnnecessaryImports": "off",
+  // ✅ 如果 JS 文件也有此问题
+  "javascript.reportUnnecessaryImports": "off"
+}

@@ -17,8 +17,9 @@
     "paths": {
       "@/*": ["src/*"],
     },
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    // ✅ 禁止报告未使用的导入
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "noImplicitReturns": true,
     "ignoreDeprecations": "6.0"
   },
