@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "axios": "^1.15.0",
-    "reflect-metadata": "^0.2.2"
+    "reflect-metadata": "^0.2.2",
+    "typebox": "^1.2.3"
   }
 }
