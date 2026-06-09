@@ -14,7 +14,8 @@
     "dev": "tsc --watch",
     "type-check": "tsc --noEmit",
     "hello": "npx tsx src/hello.ts",
-    "pi-ai-usage": "npx tsx src/pi-agent/pi-ai-usage.ts"
+    "pi-ai-usage": "npx tsx src/pi-agent/pi-ai-usage.ts",
+    "pi-agent-core-usage": "npx tsx src/pi-agent/pi-agent-core-usage.ts"
   },
   "dependencies": {
     "dotenv": "^16.4.0",
