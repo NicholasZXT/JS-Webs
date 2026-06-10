@@ -61,6 +61,9 @@ function getOllamaModelConfig(): {
 }
 
 
+/**
+ * 练习 pi-ai 的模型基本调用。
+ */
 async function showModelUsage(): Promise<void> {
   const { ollamaModel, options } = getOllamaModelConfig();
 
@@ -128,6 +131,10 @@ async function showModelUsage(): Promise<void> {
   // context.messages.push(finalMessage);
 }
 
+
+/**
+ * 练习 pi-ai 的工具调用。
+ */
 async function showToolCalling() {
   const { ollamaModel, options } = getOllamaModelConfig();
 

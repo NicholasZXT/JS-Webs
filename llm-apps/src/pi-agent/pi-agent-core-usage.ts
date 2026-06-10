@@ -21,20 +21,27 @@ import type {
   BeforeToolCallContext, AfterToolCallContext,
   AgentToolResult, BeforeToolCallResult, AfterToolCallResult,
   // 来自 agent/harness/types.ts
-  AgentHarnessOptions, ExecutionEnv,
-  Skill, AgentHarnessStreamOptions, CompactionSettings,
-  SessionContext, SessionMetadata, SessionStorage,
+  AgentHarnessOptions, ExecutionEnv, AgentHarnessResources, AgentHarnessStreamOptions, AgentHarnessPhase,
+  SessionRepo, SessionStorage, SessionMetadata, SessionContext, 
+  PromptTemplate, Skill, 
+  BashExecutionMessage, BranchSummaryMessage, CompactionSummaryMessage, CustomMessage,
+  CompactionSettings,
+  AgentHarnessErrorCode, SessionErrorCode, FileErrorCode, ExecutionErrorCode, BranchSummaryErrorCode, CompactionErrorCode,
 } from "@earendil-works/pi-agent-core";
 import { 
   Agent, 
   agentLoop, runAgentLoop, runAgentLoopContinue, 
-  loadPromptTemplates, loadSkills,
-  convertToLlm,
   // 来自 agent/harness
-  AgentHarness, Session,
-  InMemorySessionRepo,
-  FileError, ExecutionError,
+  AgentHarness, 
+  Session, buildSessionContext, InMemorySessionRepo, JsonlSessionRepo, 
+  loadPromptTemplates, loadSkills, 
+  convertToLlm, bashExecutionToText, createBranchSummaryMessage, createCompactionSummaryMessage, createCustomMessage,
+  estimateTokens, calculateContextTokens, shouldCompact, prepareCompaction, compact, generateBranchSummary,
+  executeShellWithCapture,
+  AgentHarnessError, SessionError, FileError, ExecutionError, BranchSummaryError, CompactionError,
 } from "@earendil-works/pi-agent-core";
+import { NodeExecutionEnv } from "@earendil-works/pi-agent-core/node";
+import { env } from "node:process";
 
 
 function getOllamaModelConfig(): {
@@ -70,7 +77,9 @@ function getOllamaModelConfig(): {
   return { ollamaModel, options };
 }
 
-
+/**
+ * 练习 pi-agent-core 里 Agent 类的基本使用。
+ */
 async function showAgentBasicUsage(): Promise<void> {
 
   const { ollamaModel, options } = getOllamaModelConfig();
@@ -131,26 +140,40 @@ async function showAgentBasicUsage(): Promise<void> {
 }
 
 
+/**
+ * 练习 AgentHarness 类的基本使用。
+ * 
+ * AgentHarness 类主要的外部调用方法如下：
+ * - prompt()
+ * - steer()
+ * - followUp()
+ * - nextTurn()
+ * - abort()
+ * - waitForIdle()
+ * 
+ * 上下文管理相关方法：
+ * - skill()
+ * - promptFromTemplate()
+ * - appendMessage()
+ * - compact()
+ * - navigateTree()
+ * 
+ * 事件订阅方法有如下2个：
+ * - subscribe(): 监听所有事件，但只能作为观察者
+ * - on(): 监听特定类型的 Harness 自有事件，可通过注册的 handler 返回结果，并对Agent行为进行干预
+ * 
+ * 其他大部分方法都被标记为 private，是内部调用的。
+ */
 async function showAgentHarnessBasicUsage(): Promise<void> {
 
   const { ollamaModel, options } = getOllamaModelConfig();
 
   // ==========================================
-  // 1. 创建 Session（会话存储）
-  // ==========================================
-  // AgentHarness 需要一个 Session 来持久化对话历史。
-  // InMemorySessionRepo 是内存中的实现，适合练习/测试；
-  // 生产环境可用 JsonlSessionRepo（文件持久化）。
-  const sessionRepo = new InMemorySessionRepo();
-  const session: Session = await sessionRepo.create({ id: "demo-session-1" });
-  console.log(">>> Session created, id:", (await session.getMetadata()).id);
-
-  // ==========================================
-  // 2. 配置 ExecutionEnv（执行环境）
+  // 1. 配置 ExecutionEnv（执行环境）
   // ==========================================
   // ExecutionEnv 提供文件系统和 Shell 执行能力。
   // 这里使用最小化实现（无实际文件系统/Shell），仅用于演示。
-  const env: ExecutionEnv = {
+  const fakeEnv: ExecutionEnv = {
     cwd: process.cwd(),
     absolutePath: async (path: string) => ({ ok: true as const, value: path }),
     joinPath: async (parts: string[]) => ({ ok: true as const, value: parts.join("/") }),
@@ -170,6 +193,21 @@ async function showAgentHarnessBasicUsage(): Promise<void> {
     cleanup: async () => {},
     exec: async () => ({ ok: false as const, error: new ExecutionError("shell_unavailable", "not implemented") }),
   };
+
+  // pi-agent-core 内部也提供了一个基于NodeJS的执行环境
+  const nodeEnv: NodeExecutionEnv = new NodeExecutionEnv({
+    cwd: process.cwd()
+  })
+
+  // ==========================================
+  // 2. 创建 Session（会话存储）
+  // ==========================================
+  // AgentHarness 需要一个 Session 来持久化对话历史。
+  // InMemorySessionRepo 是内存中的实现，适合练习/测试；
+  // 生产环境可用 JsonlSessionRepo（文件持久化）。
+  const sessionRepo = new InMemorySessionRepo();
+  const session: Session = await sessionRepo.create({ id: "demo-session-1" });
+  console.log(">>> Session created, id:", (await session.getMetadata()).id);
 
   // ==========================================
   // 3. 定义 Tool（可选）
@@ -198,15 +236,27 @@ async function showAgentHarnessBasicUsage(): Promise<void> {
   const tools: AgentTool[] = [getCurrentTimeTool];
 
   // ==========================================
-  // 4. 创建 AgentHarness 实例
+  // 4. 加载资源：PromptTemplate 和 Skill
+  // ==========================================
+  const {promptTemplates: promptTemplates, diagnostics: promptDiagnostics} = await loadPromptTemplates(nodeEnv, process.cwd());
+  const {skills: skills, diagnostics: skillDiagnostics} = await loadSkills(nodeEnv, process.cwd());
+  const resources: AgentHarnessResources = {
+    promptTemplates,
+    skills
+  }
+
+  // ==========================================
+  // 5. 创建 AgentHarness 实例
   // ==========================================
   const harnessOptions: AgentHarnessOptions = {
-    env,
+    env: fakeEnv,
+    // env: nodeEnv,
     session,
     model: ollamaModel,
     systemPrompt: "你是一个智能助手，可以使用一系列工具。后续请用中文回答。",
     tools,
     activeToolNames: ["getCurrentTime"], // 指定哪些工具对模型可见
+    resources,
     thinkingLevel: "low",
     getApiKeyAndHeaders: async (model: Model<any>) => {
       if (model.provider === "ollama") {
@@ -214,15 +264,21 @@ async function showAgentHarnessBasicUsage(): Promise<void> {
       }
       return { apiKey: "unused" };
     },
-    // steeringMode: "queue",   // 转向消息的队列模式
-    // followUpMode: "queue",   // 追问消息的队列模式
+    // 下面两个参数的值，只能从 QueueMode = "all" | "one-at-a-time" 里二选一
+    steeringMode: "one-at-a-time",   // 转向消息的队列模式
+    followUpMode: "one-at-a-time",   // 追问消息的队列模式
+    streamOptions: {
+      transport: "auto",
+      timeoutMs: 10000,
+      maxRetries: 50,
+    }
   };
 
   const harness = new AgentHarness(harnessOptions);
   console.log(">>> AgentHarness created");
 
   // ==========================================
-  // 5. 订阅事件（subscribe）
+  // 6. 订阅事件（subscribe）
   // ==========================================
   // subscribe 用于监听所有事件（包括底层 Agent 事件和 Harness 自有事件）
 
@@ -261,7 +317,7 @@ async function showAgentHarnessBasicUsage(): Promise<void> {
   });
 
   // ==========================================
-  // 6. 注册生命周期钩子（on）
+  // 7. 注册生命周期钩子（on）
   // ==========================================
   // on() 用于注册特定类型的钩子，可以修改/拦截流程。
   // 与 subscribe 不同，on() 的 handler 可以返回结果来影响行为。
@@ -281,21 +337,21 @@ async function showAgentHarnessBasicUsage(): Promise<void> {
   });
 
   // ==========================================
-  // 7. 与 Agent 交互
+  // 8. 与 Agent 交互
   // ==========================================
 
-  // 7.1 prompt(): 发送用户消息，返回 AssistantMessage
+  // 8.1 prompt(): 发送用户消息，返回 AssistantMessage
   console.log("\n\n=== 第一轮对话: prompt() ===");
   const response1 = await harness.prompt("你好，请介绍一下你自己。");
   console.log("\n\n[响应] 消息内容块数:", response1.content.length);
 
-  // 7.2 带工具调用的对话
+  // 8.2 带工具调用的对话
   console.log("\n\n=== 第二轮对话: 工具调用 ===");
   console.log("用户: 现在几点了？");
   const response2 = await harness.prompt("现在几点了？");
   console.log("\n[响应] 消息内容块数:", response2.content.length);
 
-  // 7.3 steer(): 发送转向消息
+  // 8.3 steer(): 发送转向消息
   // 注意：steer() 只能在 Agent 执行期间（非 idle）调用，用于中途修正行为。
   // 如果在 idle 状态调用会抛出 "Cannot steer while idle" 错误。
   // 正确用法：在 subscribe 回调中监听 tool_call 等事件时调用 steer()。
@@ -304,13 +360,13 @@ async function showAgentHarnessBasicUsage(): Promise<void> {
   await harness.nextTurn("请用更简洁的方式回答。");
   console.log("下轮指令已加入队列");
 
-  // 7.4 继续对话
+  // 8.4 继续对话
   console.log("\n用户: 再次告诉我现在的时间。");
   const response3 = await harness.prompt("再次告诉我现在的时间。");
   console.log("\n[响应] 消息内容块数:", response3.content.length);
 
   // ==========================================
-  // 8. 查看当前状态
+  // 9. 查看当前状态
   // ==========================================
   console.log("\n\n=== AgentHarness 当前状态 ===");
   console.log("模型:", harness.getModel().id);
@@ -319,7 +375,7 @@ async function showAgentHarnessBasicUsage(): Promise<void> {
   console.log("活跃工具:", harness.getActiveTools().map((t) => t.name));
 
   // ==========================================
-  // 9. 动态修改配置
+  // 10. 动态修改配置
   // ==========================================
   // 可以运行时切换模型、工具等
   // await harness.setModel(anotherModel);
@@ -327,7 +383,7 @@ async function showAgentHarnessBasicUsage(): Promise<void> {
   // await harness.setActiveTools(["otherTool"]);
 
   // ==========================================
-  // 10. 等待空闲 & 清理
+  // 11. 等待空闲 & 清理
   // ==========================================
   await harness.waitForIdle();
   console.log("\n>>> AgentHarness 已空闲，演示结束");
@@ -335,7 +391,7 @@ async function showAgentHarnessBasicUsage(): Promise<void> {
 
 
 async function main(): Promise<void> {
-  // await showAgentBasicUsage();
+  await showAgentBasicUsage();
   await showAgentHarnessBasicUsage();
 }
 
