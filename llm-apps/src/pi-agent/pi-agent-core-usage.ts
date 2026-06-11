@@ -144,23 +144,60 @@ async function showAgentBasicUsage(): Promise<void> {
  * 练习 AgentHarness 类的基本使用。
  * 
  * AgentHarness 类主要的外部调用方法如下：
- * - prompt()
- * - steer()
- * - followUp()
- * - nextTurn()
+ * 
+ * ---
+ * 对话交互方法：
+ * 
+ * - prompt(text, options?)
+ *   发送用户消息并等待 Assistant 回复。要求 Agent 处于 idle 状态（否则抛 "busy"）。
+ *   内部流程：消费 nextTurnQueue → 触发 before_agent_start 钩子 → 调用底层 runAgentLoop → 返回 AssistantMessage。
+ * 
+ * - steer(text, options?)
+ *   在 Agent 执行期间（非 idle）插入转向消息到 steerQueue，用于中途修正 Agent 行为。
+ *   消息会在当前 turn 的下一个 LLM 请求前注入到对话中。idle 状态下调用会抛 "Cannot steer while idle"。
+ * 
+ * - followUp(text, options?)
+ *   在 Agent 执行期间（非 idle）插入追问消息到 followUpQueue，在当前 assistant 回复完成后触发新 turn。
+ *   与 steer 不同，followUp 不会中断当前回复，而是在回复结束后才注入。idle 状态下调用会抛 "Cannot follow up while idle"。
+ * 
+ * - nextTurn(text, options?)
+ *   将消息加入 nextTurnQueue，在下一轮 prompt() 调用时自动插入到用户消息之前。
+ *   无 idle 限制，可在任意时刻调用。
+ * 
  * - abort()
+ *   中止当前 Agent 执行：清空 steerQueue/followUpQueue，调用 AbortController.abort()，等待 idle。
+ *   返回被清空的 steer 和 followUp 消息列表。
+ * 
  * - waitForIdle()
+ *   等待当前 runPromise 完成（即 Agent 回到 idle 状态）。通常用于确保上一次操作完全结束。
  * 
- * 上下文管理相关方法：
- * - skill()
- * - promptFromTemplate()
- * - appendMessage()
- * - compact()
- * - navigateTree()
+ * ---
+ * 上下文管理方法：
  * 
+ * - appendMessage(message)
+ *   直接向 Session 中追加一条消息（不触发 Agent 运行）。idle 时直接写入，非 idle 时加入 pending 队列。
+ * 
+ * - skill(name, additionalInstructions?)
+ *   按名称查找已加载的 Skill，格式化后作为 prompt 发送给 Agent。要求 idle 状态。
+ *   内部调用 formatSkillInvocation() 将 skill 包装为 XML 格式的 prompt。
+ * 
+ * - promptFromTemplate(name, args?)
+ *   按名称查找已加载的 PromptTemplate，用 args 替换模板中的占位符（$1, $2, $@ 等），
+ *   然后作为 prompt 发送给 Agent。要求 idle 状态。
+ * 
+ * - compact(customInstructions?)
+ *   对当前会话历史进行压缩/摘要，减少 token 消耗。要求 idle 状态。
+ *   内部流程：prepareCompaction → session_before_compact 钩子 → compact() 调用 LLM 生成摘要 → 写入 CompactionEntry。
+ * 
+ * - navigateTree(targetId, options?)
+ *   将会话树导航到指定节点（支持分支切换）。要求 idle 状态。
+ *   options 支持：summarize（是否生成分支摘要）、customInstructions、replaceInstructions、label。
+ *   内部流程：session_before_tree 钩子 → 可选 generateBranchSummary → moveTo 目标节点。
+ * 
+ * ---
  * 事件订阅方法有如下2个：
- * - subscribe(): 监听所有事件，但只能作为观察者
- * - on(): 监听特定类型的 Harness 自有事件，可通过注册的 handler 返回结果，并对Agent行为进行干预
+ * - subscribe(): 监听所有事件（包括底层 AgentEvent 和 Harness 自有事件），但只能作为观察者，无法干预流程。
+ * - on(): 监听特定类型的 Harness 自有事件，可通过注册的 handler 返回结果来干预 Agent 行为（如阻止工具调用、修改 systemPrompt 等）。
  * 
  * 其他大部分方法都被标记为 private，是内部调用的。
  */
