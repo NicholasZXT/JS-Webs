@@ -238,7 +238,47 @@ async function showAgentHarnessBasicUsage(): Promise<void> {
   // ==========================================
   // 4. 加载资源：PromptTemplate 和 Skill
   // ==========================================
-  const {promptTemplates: promptTemplates, diagnostics: promptDiagnostics} = await loadPromptTemplates(nodeEnv, process.cwd());
+  /**
+   * loadPromptTemplates() 函数用于从指定的目录中以 非递归方式 加载以 .md 结尾的文件作为提示词模板。
+   * loadSkills() 函数用于从指定目录中采用 递归子目录方式 加载 SKILL.md 文件作为 skills；
+   * 此外，顶层根目录下的 .md 文件也会被加载为 skills。
+   * 
+   * 两者底层支持的文件内容格式是一样的，规范如下：
+   * 
+   * ```markdown
+   * ---
+   * name: 可选名称（仅 loadSkills 使用，若不提供则取父目录名）
+   * description: 可选描述（loadSkills 要求必填，否则跳过该文件）
+   * disable-model-invocation: true/false（仅 loadSkills 使用）
+   * ---
+   * 对于loadPromptTemplates：这里是模板正文内容，支持占位符如 $1、$2、$@、$ARGUMENTS、${@:1}、${@:2:3} 等。
+   * 对于loadSkills：这里就是skills的正文，不支持占位符。
+   * ```
+   * 
+   * 其中：
+   * - 头部的 yaml 段是可选的，会被作为 frontmatter 信息。几种情况如下：
+   * | 场景                           | frontmatter | body             | 是否报错                |
+   * | ------------------------------ | ----------- | ---------------- | ----------------------- |
+   * | 无 `---`                       | `{}`        | 全文             | 否                      |
+   * | 有开头 `---` 无闭合            | `{}`        | 全文（含 `---`） | 否                      |
+   * | 正常 YAML frontmatter          | 解析结果    | `---` 之后的内容 | 否                      |
+   * | YAML 语法错误                  | —           | —                | **是** (`parse_failed`) |
+   * | frontmatter 为空（`---\n---`） | `{}`        | 之后的内容       | 否                      |
+   * 
+   * - 后面的正文部分，支持多种占位符，如下所示：
+   * | 占位符          | 含义                         | 示例                            |
+   * | --------------- | ---------------------------- | ------------------------------- |
+   * | `$1`, `$2`, ... | 第 N 个位置参数（1-indexed） | `$1` → 第一个参数               |
+   * | `$@`            | 所有参数，空格连接           | `$@` → `arg1 arg2 arg3`         |
+   * | `$ARGUMENTS`    | 同 `$@`                      | `$ARGUMENTS` → `arg1 arg2 arg3` |
+   * | `${@:N}`        | 从第 N 个参数开始的所有参数  | `${@:2}` → `arg2 arg3`          |
+   * | `${@:N:L}`      | 从第 N 个参数开始的 L 个参数 | `${@:2:1}` → `arg2`             |
+   * 
+   */
+  // 使用专门的 prompts/ 目录加载模板，避免加载到项目根目录的 README.md、AGENTS.md 等无关文件
+  const promptsDirResult = await nodeEnv.absolutePath("prompts");
+  const promptsDir = promptsDirResult.ok ? promptsDirResult.value : process.cwd();
+  const {promptTemplates: promptTemplates, diagnostics: promptDiagnostics} = await loadPromptTemplates(nodeEnv, promptsDir);
   const {skills: skills, diagnostics: skillDiagnostics} = await loadSkills(nodeEnv, process.cwd());
   const resources: AgentHarnessResources = {
     promptTemplates,

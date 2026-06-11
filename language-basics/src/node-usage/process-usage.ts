@@ -49,6 +49,11 @@ process.on('unhandledRejection', (reason: unknown, promise: Promise<unknown>) =>
 console.log('进程 ID (PID):', process.pid);
 console.log('运行平台:', process.platform); // 如 'win32', 'linux', 'darwin'
 console.log('当前工作目录:', process.cwd());
+console.log('进程内存:', process.memoryUsage())
+console.log('可用内存:', process.availableMemory())
+console.log('限制内存:', process.constrainedMemory())
+console.log('CPU使用率:', process.cpuUsage())
+console.log('进程title:', process.title)
 
 // 7. 主动退出进程
 // 注释掉以下行以避免立即退出（仅作示例）
